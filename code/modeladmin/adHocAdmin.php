@@ -1,16 +1,31 @@
 <?php
 
+/**
+ * Class AdHocSqlAdmin
+ */
 class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
 {
 
+    /**
+     * @var string
+     */
     private static $url_segment = 'ad-hoc-sql';
 
+    /**
+     * @var string
+     */
     private static $menu_title = 'Ad Hoc';
 
+    /**
+     * @var string[]
+     */
     private static $managed_models = [
         AdHocSQL::class
     ];
 
+    /**
+     * @var string[]
+     */
     private static $allowed_actions = array(
         'countAction',
         'sqlAction',
@@ -18,10 +33,19 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         'exportAction'
     );
 
+    /**
+     * @var array
+     */
     private static $model_importers = [];
 
+    /**
+     * @var bool
+     */
     private static $require_explicit_permission = true;
 
+    /**
+     * @return string[]
+     */
     public function providePermissions()
     {
         return array(
@@ -29,16 +53,26 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         );
     }
 
+    /**
+     * @param $val
+     */
     public static function set_require_explicit_permission($val)
     {
         self::$require_explicit_permission = $val;
     }
 
+    /**
+     * @param $val
+     * @return bool
+     */
     public static function get_require_explicit_permission($val)
     {
         return self::$require_explicit_permission;
     }
 
+    /**
+     *
+     */
     public function init()
     {
         parent::init();
@@ -48,8 +82,16 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         }
     }
 
+    /**
+     * @var float
+     */
     private static $menu_priority = -0.5;
 
+    /**
+     * @param null $id
+     * @param null $fields
+     * @return mixed
+     */
     public function getEditForm($id = null, $fields = null)
     {
         $form = parent::getEditForm($id, $fields);
@@ -80,6 +122,9 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         return $form;
     }
 
+    /**
+     * @return SQLSelect
+     */
     public function generateQuery()
     {
         $sqlQuery = new SQLSelect();
@@ -124,6 +169,10 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         return $sqlQuery;
     }
 
+    /**
+     * @param SQLSelect $sqlQuery
+     * @return string
+     */
     public function doQuery(SQLSelect $sqlQuery)
     {
         try {
@@ -138,21 +187,39 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         return $query;
     }
 
+    /**
+     * @param $data
+     * @param Form $form
+     * @return mixed
+     */
     public function sqlAction($data, Form $form)
     {
         return $this->getResponseNegotiator()->respond($this->getRequest());
     }
 
+    /**
+     * @param $data
+     * @param Form $form
+     * @return mixed
+     */
     public function countAction($data, Form $form)
     {
         return $this->getResponseNegotiator()->respond($this->getRequest());
     }
 
+    /**
+     * @param $data
+     * @param Form $form
+     * @return mixed
+     */
     public function tableAction($data, Form $form)
     {
         return $this->getResponseNegotiator()->respond($this->getRequest());
     }
 
+    /**
+     * @return mixed
+     */
     public function getSearchContext()
     {
         $context = parent::getSearchContext();

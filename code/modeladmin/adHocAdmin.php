@@ -107,15 +107,19 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
             $actions->push(FormAction::create('tableAction', 'Table'));
             $actions->push(FormAction::create('exportAction', 'Export'));
             $query = $this->generateQuery();
-            foreach($params as $key => $value){
-                $form->Fields()->push(HiddenField::Create("q[".$key."]",$key,$value));
+            foreach ($params as $key => $value) {
+                $form->Fields()->push(HiddenField::Create("q[" . $key . "]", $key, $value));
             }
             if ($this->request->requestVar('action_countAction')) {
-                $form->Fields()->push(LiteralField::Create("Count",$this->doQuery($this->generateQuery())->numRecords()));
-            } else if ($this->request->requestVar('action_tableAction') == 1) {
-                $form->Fields()->push(LiteralField::Create("Results",$this->doQuery($this->generateQuery())->table()));
+                $form->Fields()->push(LiteralField::Create("Count",
+                    $this->doQuery($this->generateQuery())->numRecords()));
             } else {
-                $form->Fields()->push(LiteralField::Create("Sql",$query->sql()));
+                if ($this->request->requestVar('action_tableAction') == 1) {
+                    $form->Fields()->push(LiteralField::Create("Results",
+                        $this->doQuery($this->generateQuery())->table()));
+                } else {
+                    $form->Fields()->push(LiteralField::Create("Sql", $query->sql()));
+                }
             }
         }
 
@@ -144,14 +148,20 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
 
         if (isset($params['where']) && $params['where']) {
             $sqlQuery->setWhere($params['where']);
-        } else if (isset($params['whereAny']) && $params['whereAny']) {
-            $sqlQuery->setWhereAny($params['whereAny']);
+        } else {
+            if (isset($params['whereAny']) && $params['whereAny']) {
+                $sqlQuery->setWhereAny($params['whereAny']);
+            }
         }
 
         if (isset($params['leftJoin']) && $params['leftJoin']) {
-            $sqlQuery->addLeftJoin($params['leftJoin'],isset($params['leftJoinClause']) && $params['leftJoinClause'] ? $params['leftJoinClause'] : '');
-        } else if (isset($params['innerJoin']) && $params['innerJoin']) {
-            $sqlQuery->addInnerJoin($params['innerJoin'],isset($params['innerJoinClause']) && $params['innerJoinClause'] ? $params['innerJoinClause'] : '');
+            $sqlQuery->addLeftJoin($params['leftJoin'],
+                isset($params['leftJoinClause']) && $params['leftJoinClause'] ? $params['leftJoinClause'] : '');
+        } else {
+            if (isset($params['innerJoin']) && $params['innerJoin']) {
+                $sqlQuery->addInnerJoin($params['innerJoin'],
+                    isset($params['innerJoinClause']) && $params['innerJoinClause'] ? $params['innerJoinClause'] : '');
+            }
         }
 
         if (isset($params['groupBy']) && $params['groupBy']) {
@@ -159,7 +169,8 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         }
 
         if (isset($params['orderBy']) && $params['orderBy']) {
-            $sqlQuery->setOrderBy($params['orderBy'], isset($params['orderByDirection']) && $params['orderByDirection'] ? $params['orderByDirection'] : '');
+            $sqlQuery->setOrderBy($params['orderBy'],
+                isset($params['orderByDirection']) && $params['orderByDirection'] ? $params['orderByDirection'] : '');
         }
 
         if (isset($params['limit']) && $params['limit']) {
@@ -250,10 +261,6 @@ class AdHocSqlAdmin extends ModelAdmin implements PermissionProvider
         $innerJoin = new TextField('q[innerJoin]', 'Inner Join');
         $context->getFields()->push($innerJoin);
 
-        //"TEATransaction"
-        // ON "TEATransaction"."SenderAccountNumber" = "MemberBalance"."SenderAccountNumber"
-//"MemberBalance"."Contributions"
-        //"MemberBalance"
         $leftJoinClause = new TextField('q[innerJoinClause]', 'Inner Join Clause');
         $context->getFields()->push($leftJoinClause);
 

@@ -1,8 +1,7 @@
 <% if $IncludeFormTag %>
 <form $FormAttributes data-layout-type="border">
 <% end_if %>
-
-	<div class="cms-content-fields west cms-panel-padded">
+    <div class="cms-content west cms-panel-padded">
 		<fieldset>
 			<% if $Legend %><legend>$Legend</legend><% end_if %>
 			<% loop $Fields %>
@@ -13,13 +12,15 @@
 	</div>
     <div class="cms-content-fields center cms-panel-padded">
         <% if $Message %>
-        <p id="{$FormName}_error" class="message $MessageType">$Message</p>
+            <p id="{$FormName}_error" class="message $MessageType">$Message</p>
         <% else %>
-        <p id="{$FormName}_error" class="message $MessageType" style="display: none"></p>
+            <p id="{$FormName}_error" class="message $MessageType" style="display: none"></p>
         <% end_if %>
 
-        <fieldset>
-            <% if $Result %>$Result<% end_if %>
+        <fieldset class="result">
+            <% with $Controller %>
+                <% if $Result %>$Result<% end_if %>
+            <% end_with %>
 
             <div class="clear"><!-- --></div>
         </fieldset>

@@ -62,6 +62,7 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
         parent::init();
 
         Requirements::css('ad_hoc_sql/css/adhocsql.css');
+        Requirements::javascript('ad_hoc_sql/js/adHocSqlAdmin.js');
 
         if (self::$require_explicit_permission && !Permission::check("Ad_Hoc_SQL")) {
             Security::permissionFailure();
@@ -96,12 +97,12 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
 
         $params = $this->request->requestVar('q'); // use this to access search parameters
 
-        if ($params) {
-            $actions->push(FormAction::create('sqlAction', 'Sql'));
-            $actions->push(FormAction::create('countAction', 'Count'));
-            $actions->push(FormAction::create('tableAction', 'Table'));
-            $actions->push(FormAction::create('exportAction', 'Export'));
-        }
+        $actions->push(FormAction::create('sqlAction', 'Sql'));
+        $actions->push(FormAction::create('countAction', 'Count'));
+        $actions->push(FormAction::create('tableAction', 'Table'));
+        $button = FormAction::create('exportAction', 'Export');
+        $button->addExtraClass('no-ajax-ad-hoc');
+        //$actions->push($button);
 
         return $form;
     }
@@ -163,10 +164,6 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
         try {
             $query = $sqlQuery->execute();
         } catch (Exception $exception) {
-            SS_Log::log(
-                sprintf('DateTime (%s)', $exception->getMessage()),
-                SS_Log::ERR
-            );
             return $exception->getMessage();
         }
         return $query;
@@ -180,17 +177,54 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
 
         if ($params) {
             if ($this->request->requestVar('action_countAction')) {
-                foreach ($this->doQuery($this->generateQuery(true)) as $data) {
-                    $numRows = $data['COUNT(*)'];
-                }
-                $result = $numRows;
+                $result = $this->doQuery($this->generateQuery(true))->table();
             } else if ($this->request->requestVar('action_tableAction') == 1) {
-                $result = $this->generateQuery()->table();
+                $result = $this->doQuery($this->generateQuery())->table();
             } else {
                 $result = $this->generateQuery()->sql();
             }
         }
         return $result;
+    }
+
+    public function handleExport() {
+        $now = Date("d-m-Y-H-i");
+        $fileName = "export-$now.csv";
+
+        if($fileData = $this->generateExportFileData()){
+            return SS_HTTPRequest::send_file($fileData, $fileName, 'text/csv');
+        }
+    }
+
+    public function generateExportFileData() {
+        $separator = ",";
+        $fileData = array();
+        $headerRow = true;
+
+        foreach ($this->doQuery($this->generateQuery()) as $data) {
+            if ($headerRow) {
+                $headers = [];
+                foreach($data as $field => $value){
+                    $headers[] = $field;
+                }
+                $fileData[] = $headers;
+                $headerRow = false;
+            }
+            $columnData = [];
+            foreach($data as $field => $value){
+                $columnData[] = $value;
+            }
+
+            $fileData[] = $columnData;
+        }
+
+        // Convert the $fileData array into csv by capturing fputcsv's output
+        $csv = fopen('php://temp', 'r+');
+        foreach($fileData as $line) {
+            fputcsv($csv, $line, $separator);
+        }
+        rewind($csv);
+        return stream_get_contents($csv);
     }
 
     public function generateAction($data, Form $form)
@@ -215,6 +249,6 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
 
     public function exportAction($data, Form $form)
     {
-        return $this->getResponseNegotiator()->respond($this->getRequest());
+        return $this->handleExport();
     }
 }

@@ -1,3 +1,35 @@
-.cms .cms-content {
+.cms .cms-content.AdHocSqlAdmin {
   overflow: scroll;
+}
+.cms .AdHocSqlAdmin .result table {
+    display: table;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    padding: 0;
+    border-collapse: separate;
+    border-bottom: 0 none;
+    width: 100%;
+}
+.cms .AdHocSqlAdmin .result table tr th {
+    white-space: nowrap;
+    border-top: 1px solid #a4b4bf;
+    border-left: 1px solid #a4b4bf;
+    color: #fff;
+    background: #98aab6;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 8px 8px;
+}
+.cms .AdHocSqlAdmin .result table tbody {
+    background: #FFF;
+}
+.cms .AdHocSqlAdmin .result table tr td {
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 8px 8px;
+    color: #666;
+}
+.cms .AdHocSqlAdmin .result table tbody td {
+    width: auto;
+    max-width: 500px;
+    word-wrap: break-word;
 }

@@ -1,0 +1,21 @@
+.cms .cms-content {
+  overflow: scroll;
+}
+.AdHocSqlAdmin table th{
+  white-space: nowrap;
+  border-top: 1px solid #a4b4bf;
+  border-left: 1px solid #a4b4bf;
+  color: #fff;
+  background: #98aab6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 8px;
+}
+.AdHocSqlAdmin table td{
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 8px;
+  color: #666;
+  width: auto;
+  max-width: 500px;
+  word-wrap: break-word;
+  background-color: #fff;
+}

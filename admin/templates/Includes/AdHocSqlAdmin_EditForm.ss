@@ -17,7 +17,7 @@
             <p id="{$FormName}_error" class="message $MessageType" style="display: none"></p>
         <% end_if %>
 
-        <fieldset>
+        <fieldset class="result">
             <% with $Controller %>
                 <% if $Result %>$Result<% end_if %>
             <% end_with %>

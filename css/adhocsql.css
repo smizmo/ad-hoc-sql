@@ -1,4 +1,4 @@
-.cms .cms-content.AdHocSqlAdmin {
+.cms .cms-content.AdHocSqlAdmin .cms-content{
   overflow: scroll;
 }
 .cms .AdHocSqlAdmin .result table {

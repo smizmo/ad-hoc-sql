@@ -8,11 +8,9 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
     private static $menu_title = 'Ad Hoc SQL';
 
     private static $allowed_actions = array(
-        'generateAction',
         'countAction',
         'sqlAction',
-        'tableAction',
-        'exportAction'
+        'tableAction'
     );
 
     private static $model_importers = [];
@@ -62,7 +60,6 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
         parent::init();
 
         Requirements::css('ad_hoc_sql/css/adhocsql.css');
-        Requirements::javascript('ad_hoc_sql/js/adHocSqlAdmin.js');
 
         if (self::$require_explicit_permission && !Permission::check("Ad_Hoc_SQL")) {
             Security::permissionFailure();
@@ -92,17 +89,12 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
         $form->loadDataFrom($this->getRequest()->postVars());
 
         $actions = $form->Actions();
-        $actions->push(FormAction::create('generateAction', 'Apply'));
-
 
         $params = $this->request->requestVar('q'); // use this to access search parameters
 
         $actions->push(FormAction::create('sqlAction', 'Sql'));
         $actions->push(FormAction::create('countAction', 'Count'));
         $actions->push(FormAction::create('tableAction', 'Table'));
-        $button = FormAction::create('exportAction', 'Export');
-        $button->addExtraClass('no-ajax-ad-hoc');
-        //$actions->push($button);
 
         return $form;
     }
@@ -164,6 +156,10 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
         try {
             $query = $sqlQuery->execute();
         } catch (Exception $exception) {
+            SS_Log::log(
+                sprintf('DateTime (%s)', $exception->getMessage()),
+                SS_Log::ERR
+            );
             return $exception->getMessage();
         }
         return $query;
@@ -185,51 +181,6 @@ class AdHocSqlAdmin extends LeftAndMain implements PermissionProvider
             }
         }
         return $result;
-    }
-
-    public function handleExport() {
-        $now = Date("d-m-Y-H-i");
-        $fileName = "export-$now.csv";
-
-        if($fileData = $this->generateExportFileData()){
-            return SS_HTTPRequest::send_file($fileData, $fileName, 'text/csv');
-        }
-    }
-
-    public function generateExportFileData() {
-        $separator = ",";
-        $fileData = array();
-        $headerRow = true;
-
-        foreach ($this->doQuery($this->generateQuery()) as $data) {
-            if ($headerRow) {
-                $headers = [];
-                foreach($data as $field => $value){
-                    $headers[] = $field;
-                }
-                $fileData[] = $headers;
-                $headerRow = false;
-            }
-            $columnData = [];
-            foreach($data as $field => $value){
-                $columnData[] = $value;
-            }
-
-            $fileData[] = $columnData;
-        }
-
-        // Convert the $fileData array into csv by capturing fputcsv's output
-        $csv = fopen('php://temp', 'r+');
-        foreach($fileData as $line) {
-            fputcsv($csv, $line, $separator);
-        }
-        rewind($csv);
-        return stream_get_contents($csv);
-    }
-
-    public function generateAction($data, Form $form)
-    {
-        return $this->getResponseNegotiator()->respond($this->getRequest());
     }
 
     public function sqlAction($data, Form $form)
